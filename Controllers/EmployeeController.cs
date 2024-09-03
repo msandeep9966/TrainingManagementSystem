@@ -42,7 +42,7 @@ namespace TrainingManagementSystem.Controllers
         public IActionResult CancelCourse([FromBody] CancelCourse c)
         {
             var deletedCourse = _dc.CourseEnrollments
-                .FirstOrDefault(t => t.EmployeeId == c.EmployeeId && t.EnrollmentId == c.EnrollmentId);
+                .FirstOrDefault(t => t.EmployeeId == c.EmployeeId && t.EnrollmentId == c.EnrollmentId && t.Status != "Completed");
 
             if (deletedCourse != null)
             {
@@ -151,5 +151,23 @@ namespace TrainingManagementSystem.Controllers
 
         }
 
+
+        [Route("enrollcourse")]
+        [HttpPost]
+        public IActionResult EnrollCourse([FromBody] CourseEnrollment c)
+        {
+            _dc.CourseEnrollments.Add(c);
+            try
+            {
+                return Ok($"{_dc.SaveChanges()} rows effected");
+            }
+            catch (Exception e)
+            {
+                // if the inneerException is there then it will print that .
+                // it is like && in react (jsx)
+                return NotFound(e.InnerException?.Message ?? e.Message);
+            }
+
+        }
     }
 }

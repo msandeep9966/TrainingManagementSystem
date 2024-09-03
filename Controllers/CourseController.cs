@@ -47,23 +47,5 @@ namespace TrainingManagementSystem.Controllers
 
         }
 
-
-        [Route("enrollcourse")]
-        [HttpPost]
-        public string EnrollCourse(CourseEnrollment c)
-        {
-            _dc.CourseEnrollments.Add(c);
-            try
-            {
-                return $"{_dc.SaveChanges()} rows effected";
-            }
-            catch (Exception e)
-            {
-                // if the inneerException is there then it will print that .
-                // it is like && in react (jsx)
-                return e.InnerException?.Message ?? e.Message;
-            }
-
-        }
     }
 }
