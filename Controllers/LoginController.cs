@@ -14,11 +14,31 @@ namespace TrainingManagementSystem.Controllers
 
         }
 
-        [HttpGet]
-        [Route("/login")]
-        public IActionResult Get()
+        [HttpPost]
+        [Route("loginuser")]
+        public IActionResult Get([FromBody] User user)
         {
-            return Ok(_context.Employees.ToList());
+            // this null datatype now with `?`
+            //bool? isEmployee = null;
+
+            var isEmployeeCheck = _context.Employees
+                .Any(t => t.Email == user.Email && t.Password == user.Password);
+
+            if (isEmployeeCheck)
+            {
+                return Ok(isEmployeeCheck);
+            }
+            else
+            {
+                var isManagerCheck = _context.Managers
+                    .Any(t => t.Email == user.Email && t.Password == user.Password);
+
+                if (isManagerCheck) { return Ok(false); }
+
+            }
+
+            return NotFound("No user found");
+
         }
     }
 }
