@@ -21,22 +21,20 @@ namespace TrainingManagementSystem.Controllers
             // this null datatype now with `?`
             //bool? isEmployee = null;
 
-            var isEmployeeCheck = _context.Employees
-                .Any(t => t.Email == user.Email && t.Password == user.Password);
-
-            if (isEmployeeCheck)
+            var EmployeeCheck = _context.Employees
+                .Where(t => t.Email == user.Email && t.Password == user.Password).Select(t => new { t.EmployeeId, t.UserName, isEmployee = true });
+            if (EmployeeCheck.Count() > 0)
             {
-                return Ok(isEmployeeCheck);
+                return Ok(EmployeeCheck);
             }
             else
             {
-                var isManagerCheck = _context.Managers
-                    .Any(t => t.Email == user.Email && t.Password == user.Password);
+                var ManagerCheck = _context.Managers
+                    .Where(t => t.Email == user.Email && t.Password == user.Password).Select(t => new { t.ManagerId, t.UserName, isEmployee = false });
 
-                if (isManagerCheck) { return Ok(false); }
+                if (ManagerCheck.Count() > 0) { return Ok(ManagerCheck); }
 
             }
-
             return NotFound("No user found");
 
         }
