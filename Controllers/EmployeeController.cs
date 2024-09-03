@@ -13,13 +13,6 @@ namespace TrainingManagementSystem.Controllers
             _dc = dc;
         }
 
-        [HttpPost]
-        [Route("addcourse")]
-        public int AddCourse(Course c)
-        {
-            _dc.Courses.Add(c);
-            return _dc.SaveChanges();
-        }
 
         [HttpPost]
         [Route("enrollcourse")]
@@ -66,6 +59,50 @@ namespace TrainingManagementSystem.Controllers
 
             return deletedCourse == null ? NotFound("Course not found") : Ok(deletedCourse);
 
+        }
+
+
+        [HttpPut]
+        [Route("completecourse")]
+
+        public IActionResult Course([FromQuery] int empid)
+        {
+            // Retrieve the course enrollment with the given ManagerId and status Pending
+            var enrollment = _dc.CourseEnrollments
+                .Where(t => t.EmployeeId == empid && t.Status == "Approved")
+                .FirstOrDefault();
+
+            if (enrollment == null)
+            {
+                return NotFound("No pending enrollment found for the given manager.");
+            }
+
+            // Update the status based on the 'accept' parameter
+            enrollment.Status = "Completed";
+            _dc.Update(enrollment);
+
+
+            return Ok($"{_dc.SaveChanges()} rows effected");
+        }
+
+        [HttpGet]
+        [Route("getcompletedcourses")]
+        public IActionResult GetCompletedCourses([FromQuery] int empid)
+        {
+            var completedCourses = _dc.CourseEnrollments
+                .Where(ce => ce.EmployeeId == empid && ce.Status == "Completed").ToList();
+
+            return completedCourses == null ? NotFound("No courses found") : Ok(completedCourses);
+        }
+
+        [HttpGet]
+        [Route("getpendingcourses")]
+        public IActionResult GetPendingCourses([FromQuery] int empid)
+        {
+            var pendingCourses = _dc.CourseEnrollments
+                .Where(ce => ce.EmployeeId == empid && ce.Status == "Approved").ToList();
+
+            return pendingCourses == null ? NotFound("No courses found") : Ok(pendingCourses);
         }
 
     }
