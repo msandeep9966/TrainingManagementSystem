@@ -22,7 +22,7 @@ namespace TrainingManagementSystem.Controllers
             //bool? isEmployee = null;
 
             var EmployeeCheck = _context.Employees
-                .Where(t => t.Email == user.Email && t.Password == user.Password).Select(t => new { t.EmployeeId, t.UserName, isEmployee = true });
+                .Where(t => t.Email == user.Email && t.Password == user.Password).Select(t => new { t.EmployeeId, t.UserName, isEmployee = true, t.ManagerId });
             if (EmployeeCheck.Count() > 0)
             {
                 return Ok(EmployeeCheck);

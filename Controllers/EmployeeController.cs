@@ -14,14 +14,6 @@ namespace TrainingManagementSystem.Controllers
         }
 
 
-        [HttpPost]
-        [Route("enrollcourse")]
-        public int EnrollCourse(CourseEnrollment c)
-        {
-            _dc.CourseEnrollments.Add(c);
-            return _dc.SaveChanges();
-        }
-
         [HttpGet]
         [Route("getcoursesbyempid")]
         public IActionResult GetCoursesByEmpId([FromQuery] int empid)
@@ -36,6 +28,7 @@ namespace TrainingManagementSystem.Controllers
                                  {
                                      ce.EnrollmentId,
                                      ce.EmployeeId,
+                                     ce.Status,
                                      ce.CourseId,
                                      CourseDetails = c // or select specific properties from `c`
                                  }
@@ -62,47 +55,100 @@ namespace TrainingManagementSystem.Controllers
         }
 
 
-        [HttpPut]
-        [Route("completecourse")]
+        [HttpGet]
+        [Route("getpendingcourse")]
 
-        public IActionResult Course([FromQuery] int empid)
+        public IActionResult GetPendingCourse([FromQuery] int empid)
         {
             // Retrieve the course enrollment with the given ManagerId and status Pending
             var enrollment = _dc.CourseEnrollments
-                .Where(t => t.EmployeeId == empid && t.Status == "Approved")
-                .FirstOrDefault();
+                             .Join(
+                                 _dc.Courses,
+                                 ce => ce.CourseId,  // The CourseId from CourseEnrollment
+                                 c => c.CourseId,    // The CourseId from Course
+                                 (ce, c) => new
+                                 {
+                                     ce.EnrollmentId,
+                                     ce.EmployeeId,
+                                     ce.Status,
+                                     ce.CourseId,
+                                     CourseDetails = c // or select specific properties from `c`
+                                 }
+                             ).Where(ce => ce.EmployeeId == empid && ce.Status == "Pending").ToList();
 
             if (enrollment == null)
             {
                 return NotFound("No pending enrollment found for the given manager.");
             }
 
-            // Update the status based on the 'accept' parameter
-            enrollment.Status = "Completed";
-            _dc.Update(enrollment);
 
-
-            return Ok($"{_dc.SaveChanges()} rows effected");
+            return Ok(enrollment);
         }
 
         [HttpGet]
-        [Route("getcompletedcourses")]
+        [Route("getcompletedcourse")]
         public IActionResult GetCompletedCourses([FromQuery] int empid)
         {
             var completedCourses = _dc.CourseEnrollments
-                .Where(ce => ce.EmployeeId == empid && ce.Status == "Completed").ToList();
+                             .Join(
+                                 _dc.Courses,
+                                 ce => ce.CourseId,  // The CourseId from CourseEnrollment
+                                 c => c.CourseId,    // The CourseId from Course
+                                 (ce, c) => new
+                                 {
+                                     ce.EnrollmentId,
+                                     ce.EmployeeId,
+                                     ce.Status,
+                                     ce.CourseId,
+                                     CourseDetails = c // or select specific properties from `c`
+                                 }
+                             ).Where(ce => ce.EmployeeId == empid && ce.Status == "Completed").ToList();
 
             return completedCourses == null ? NotFound("No courses found") : Ok(completedCourses);
         }
 
         [HttpGet]
-        [Route("getpendingcourses")]
-        public IActionResult GetPendingCourses([FromQuery] int empid)
+        [Route("getactivecourse")]
+        public IActionResult GetActiveCourses([FromQuery] int empid)
         {
-            var pendingCourses = _dc.CourseEnrollments
-                .Where(ce => ce.EmployeeId == empid && ce.Status == "Approved").ToList();
+            var activeCourses = _dc.CourseEnrollments
+                             .Join(
+                                 _dc.Courses,
+                                 ce => ce.CourseId,  // The CourseId from CourseEnrollment
+                                 c => c.CourseId,    // The CourseId from Course
+                                 (ce, c) => new
+                                 {
+                                     ce.EnrollmentId,
+                                     ce.EmployeeId,
+                                     ce.Status,
+                                     ce.CourseId,
+                                     CourseDetails = c // or select specific properties from `c`
+                                 }
+                             ).Where(ce => ce.EmployeeId == empid && ce.Status == "Approved").ToList(); ;
 
-            return pendingCourses == null ? NotFound("No courses found") : Ok(pendingCourses);
+            return activeCourses == null ? NotFound("No courses found") : Ok(activeCourses);
+        }
+
+        [HttpPut]
+        [Route("completecourse")]
+        public IActionResult CompleteCourse([FromQuery] int empid, [FromQuery] int enrollMentId)
+        {
+            var completedCourse = _dc.CourseEnrollments
+                    .FirstOrDefault(t => t.EmployeeId == empid && t.EnrollmentId == enrollMentId && t.Status == "Approved");
+
+            if (completedCourse == null)
+            {
+                return NotFound("There is no cousrse with Approved status to complete");
+            }
+
+            // Update the status based on the 'accept' parameter
+            completedCourse.Status = "Completed";
+            _dc.Update(completedCourse);
+
+
+            return Ok($"{_dc.SaveChanges()} rows effected");
+
+
         }
 
     }

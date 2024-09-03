@@ -19,6 +19,17 @@ namespace TrainingManagementSystem
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("EnableCORS", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -31,6 +42,8 @@ namespace TrainingManagementSystem
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.UseCors("EnableCORS");
 
 
             app.MapControllers();

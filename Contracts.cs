@@ -16,4 +16,11 @@
         public int EnrollmentId { get; set; }
     }
 
+    public class Approval
+    {
+        public int ManagerId { get; set; }
+
+        public bool Accepted { get; set; }
+    }
+
 }
