@@ -47,11 +47,13 @@ namespace TrainingManagementSystem.Controllers.Manager
                               on ce.CourseId equals c.CourseId
                               join m in _context.Managers
                               on e.ManagerId equals m.ManagerId
-                              where m.ManagerId == id
+                              where e.EmployeeId == id && ce.Status == "Pending"
                               select new
                               {
                                   EmployeeName = e.UserName,
+                                  EmployeeId = e.EmployeeId,
                                   CourseName = c.CourseName,
+                                  CourseId = ce.CourseId,
                                   Status = ce.Status,
 
                               }).ToList();
@@ -75,22 +77,29 @@ namespace TrainingManagementSystem.Controllers.Manager
         {
             // Retrieve the course enrollment with the given ManagerId and status Pending
             var enrollment = _context.CourseEnrollments
-                .Where(t => t.ManagerId == aprv.ManagerId && t.Status == "Pending")
+                .Where(t => t.ManagerId == aprv.ManagerId && t.EmployeeId == aprv.EmployeeId && t.Status == "Pending" && t.CourseId == aprv.CourseId)
                 .FirstOrDefault();
 
             if (enrollment == null)
             {
                 return NotFound("No pending enrollment found for the given manager.");
             }
-
+            if (!aprv.Accepted)
+            {
+                enrollment.RejectionReason = aprv.RejectionReason;
+                enrollment.Status = "Rejected";
+            }
             // Update the status based on the 'accept' parameter
-            enrollment.Status = aprv.Accepted ? "Approved" : "Rejected";
+            else
+            {
+                enrollment.Status = "Approved";
+            }
 
 
             _context.Update(enrollment);
 
-
-            return Ok($"{_context.SaveChanges()} rows effected");
+            _context.SaveChanges();
+            return Ok();
         }
 
 

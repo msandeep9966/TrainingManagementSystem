@@ -33,6 +33,10 @@ namespace TrainingManagementSystem.Controllers
         [HttpPost]
         public string AddCourse(Course c)
         {
+            if (_dc.Courses.Where(t => t.CourseName == t.CourseName && (t.StartDate == c.StartDate && t.EndDate == c.EndDate)).Any())
+            {
+                return "Course already exists";
+            }
             _dc.Courses.Add(c);
             try
             {

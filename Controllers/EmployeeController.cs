@@ -145,8 +145,8 @@ namespace TrainingManagementSystem.Controllers
             completedCourse.Status = "Completed";
             _dc.Update(completedCourse);
 
-
-            return Ok($"{_dc.SaveChanges()} rows effected");
+            _dc.SaveChanges();
+            return Ok();
 
 
         }
@@ -162,7 +162,8 @@ namespace TrainingManagementSystem.Controllers
             }
             try
             {
-                return Ok($"{_dc.SaveChanges()} rows effected");
+                _dc.SaveChanges();
+                return Ok();
             }
             catch (Exception e)
             {
@@ -172,5 +173,8 @@ namespace TrainingManagementSystem.Controllers
             }
 
         }
+
+
+
     }
 }
