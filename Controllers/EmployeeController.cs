@@ -154,9 +154,12 @@ namespace TrainingManagementSystem.Controllers
 
         [Route("enrollcourse")]
         [HttpPost]
-        public IActionResult EnrollCourse([FromBody] CourseEnrollment c)
+        public IActionResult EnrollCourse([FromBody] CourseEnrollment[] c)
         {
-            _dc.CourseEnrollments.Add(c);
+            foreach (var course in c)
+            {
+                _dc.CourseEnrollments.Add(course);
+            }
             try
             {
                 return Ok($"{_dc.SaveChanges()} rows effected");
